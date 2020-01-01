@@ -158,7 +158,25 @@ namespace SocketClient {
             Console.Out.WriteLine("[ClientSimulator] Concurrent simulator is going to start ...");
             // todo: In order to test the final solution, it is recommended to implement this method.
 
+            Console.Out.WriteLine("\n[ClientSimulator] Sequential simulator is going to start ...");
+            for (int i = 0; i < numberOfClients; i++) {
+                new Thread(() => runClient(clients[i])).Start();
+            }
 
+            Console.Out.WriteLine("\n[ClientSimulator] All clients finished with their communications ... ");
+
+            Thread.Sleep(waitingTimeForStop);
+
+            Client endClient = new Client(true, -1);
+            runClient(endClient);
+
+
+        }
+
+        public void runClient(Client c) {
+            c.prepareClient();
+            c.startCommunication();
+            c.endCommunication();
         }
     }
     public class Program {
@@ -167,10 +185,8 @@ namespace SocketClient {
             Console.Clear();
             int wt = 5000, nc = 20;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
-            clientsSimulator.SequentialSimulation();
+            clientsSimulator.ConcurrentSimulation();
             Thread.Sleep(wt);
-            // todo: Uncomment this, after finishing the method.
-            //clientsSimulator.ConcurrentSimulation();
 
         }
     }
