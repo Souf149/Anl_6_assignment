@@ -163,9 +163,9 @@ namespace SocketClient {
 
         }
     }
-    class Program {
+    public class Program {
         // Main Method 
-        static void Main(string[] args) {
+        public static void Run() {
             Console.Clear();
             int wt = 5000, nc = 20;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);

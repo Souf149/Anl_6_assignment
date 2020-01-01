@@ -45,7 +45,7 @@ namespace SocketServer {
         private int listeningQueueSize = 5;
 
         public void prepareServer() {
-            byte[] bytes = new Byte[1024];
+            byte[] bytes = new byte[1024];
             String data = null;
             int numByte = 0;
             string replyMsg = "";
@@ -157,9 +157,9 @@ namespace SocketServer {
             // todo: After finishing the concurrent version of the server, implement this method to start the concurrent server
         }
     }
-    class Program {
+    public class Program {
         // Main Method 
-        static void Main(string[] args) {
+        public static void Run() {
             Console.Clear();
             ServerSimulator.sequentialRun();
             // todo: uncomment this when the solution is ready.

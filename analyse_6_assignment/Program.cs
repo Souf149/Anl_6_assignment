@@ -8,14 +8,26 @@ using System.Threading.Tasks;
 
 namespace analyse_6_assignment {
     class Program {
+        
         static void Main(string[] args) {
+            while (true) {
+                Console.WriteLine("Are you SERVER(1) or CLIENT(2)? \n");
+                string input = Console.ReadLine();
+                if (input == "1") {
+                    SocketServer.Program.Run();
+                    break;
+                }else if (input == "2") {
+                    SocketClient.Program.Run();
+                    break;
+                }
+                else {
+                    Console.WriteLine("Enter only 1 or 2");
+                }
+            }
 
+            Console.WriteLine("End of program reached.");
+            Console.ReadLine();
             
-            Thread T_server = new Thread(Server.Start);
-            Thread T_client = new Thread(Client.Start);
-
-            T_client.Start();
-            T_server.Start();
             
 
 
