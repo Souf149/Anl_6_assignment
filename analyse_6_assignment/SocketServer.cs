@@ -62,7 +62,7 @@ namespace SocketServer {
                 // This is a non-blocking listen with max number of pending requests
                 listener.Listen(listeningQueueSize);
                 while (true) {
-                    Console.WriteLine("Waiting connection ... ");
+                    Console.WriteLine("[SERVER] Waiting connection ... ");
                     // Suspend while waiting for incoming connection 
                     Socket connection = listener.Accept();
                     this.sendReply(connection, Message.welcome);
