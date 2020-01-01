@@ -33,8 +33,6 @@ namespace SocketClient {
         public int waitingTime = 0;
         string baseStdNumber = "0700";
 
-        private String msgToSend;
-
         public Client(bool finishing, int n) {
             waitingTime = new Random().Next(minWaitingTime, maxWaitingTime);
             info = new ClientInfo();
