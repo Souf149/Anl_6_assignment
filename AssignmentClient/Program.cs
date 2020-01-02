@@ -190,7 +190,7 @@ namespace SocketClient
         static void Main(string[] args)
         {
             Console.Clear();
-            int wt = 5000, nc = 20;
+            int wt = 2, nc = 5;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
             clientsSimulator.ConcurrentSimulation();
             Thread.Sleep(wt);

@@ -1,10 +1,11 @@
 ﻿/*** Fill these lines with your complete information.
  * Note: Incomplete information may result in FAIL.
  * Mameber 1: [First and Last name, first member]: // todo: write here.
- * Mameber 2: [First and Last name, second member]: // todo: write here.
+ * Ahmet Karatas
  * Std Number 1: [Student number of the first member] // todo: write here.
- * Std Number 2: [Student number of the second member] // todo: write here.
+ * 0963978
  * Class: [what is your class, example INF2C] // todo: write here.
+ * INF2C
  ***/
 
 
@@ -13,7 +14,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-/* Note: If you are using .net core 2.1, install System.Text.Json (use NuGet). */
 using System.Text.Json;
 using System.Threading;
 
@@ -179,6 +179,7 @@ namespace SocketServer
             Console.Out.WriteLine("[Server] A sample server, concurrent version ...");
             ConcurrentServer server = new ConcurrentServer();
             server.Client();
+            server.exportResults();
         }
     }
     class Program
