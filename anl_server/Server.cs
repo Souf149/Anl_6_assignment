@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*** 
+ * 
+ * Mameber 1: Soufyan Abdellati
+ * Std Number 1: 0963595
+ * Class: INF2a
+ * 
+ ***/
+
+
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -255,12 +264,12 @@ namespace anl_server {
     }
 
     public class ServerSimulator {
-        public static void sequentialRun() {
+        public static void SequentialRun() {
             Console.Out.WriteLine("[Server] A sample server, sequential version ...");
             SequentialServer server = new SequentialServer();
             server.prepareServer();
         }
-        public static void concurrentRun() {
+        public static void ConcurrentRun() {
             new ConcurrentServer();
         }
     }
@@ -269,7 +278,7 @@ namespace anl_server {
         // Main Method 
         public static void Main(string[] args) {
             Console.Clear();
-            ServerSimulator.sequentialRun();
+            ServerSimulator.SequentialRun();
             // todo: uncomment this when the solution is ready.
             //ServerSimulator.concurrentRun();
         }

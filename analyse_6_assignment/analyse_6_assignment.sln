@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "analyse_6_assignment", "analyse_6_assignment.csproj", "{9BABA4E9-3567-40CB-89DC-3A51560B17BD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anl_client", "..\anl_client\anl_client.csproj", "{1370C3DA-BA22-40AA-BF78-19AD6E5CB4DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anl_server", "..\anl_server\anl_server.csproj", "{C92349FE-5477-486B-90B4-2CDFA313EDB0}"
@@ -15,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9BABA4E9-3567-40CB-89DC-3A51560B17BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9BABA4E9-3567-40CB-89DC-3A51560B17BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9BABA4E9-3567-40CB-89DC-3A51560B17BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9BABA4E9-3567-40CB-89DC-3A51560B17BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1370C3DA-BA22-40AA-BF78-19AD6E5CB4DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1370C3DA-BA22-40AA-BF78-19AD6E5CB4DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1370C3DA-BA22-40AA-BF78-19AD6E5CB4DC}.Release|Any CPU.ActiveCfg = Release|Any CPU

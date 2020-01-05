@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -126,6 +127,7 @@ namespace SocketClient {
         private int numberOfClients;
         private Client[] clients;
         public readonly int waitingTimeForStop = 2000;
+        public List<Thread> threads = new List<Thread>();
 
 
         public ClientsSimulator(int n, int t) {
@@ -159,14 +161,17 @@ namespace SocketClient {
             // todo: In order to test the final solution, it is recommended to implement this method.
 
             Console.Out.WriteLine("\n[ClientSimulator] Sequential simulator is going to start ...");
-            for (int i = 0; i < numberOfClients; i++) {
-                new Thread(() => runClient(clients[i])).Start();
+            for (int i = 0; i < clients.Length; i++) {
+                threads.Add(new Thread(() => runClient(clients[i])));
             }
 
+            foreach(Thread t in threads) {
+                t.Start();
+            }
+
+
             Console.Out.WriteLine("\n[ClientSimulator] All clients finished with their communications ... ");
-
             Thread.Sleep(waitingTimeForStop);
-
             Client endClient = new Client(true, -1);
             runClient(endClient);
 
@@ -181,12 +186,15 @@ namespace SocketClient {
     }
     public class Program {
         // Main Method 
-        public static void Run() {
+        public static void Main(string[] args) {
             Console.Clear();
-            int wt = 5000, nc = 20;
+            int wt = 1000, nc = 5;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
+            // clientsSimulator.SequentialSimulation();
             clientsSimulator.ConcurrentSimulation();
-            Thread.Sleep(wt);
+
+            Console.WriteLine();
+            Console.Read();
 
         }
     }
