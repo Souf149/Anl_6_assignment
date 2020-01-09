@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anl_client", "..\anl_client
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anl_server", "..\anl_server\anl_server.csproj", "{C92349FE-5477-486B-90B4-2CDFA313EDB0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{1AB2842E-FFAE-4B8D-95A5-841298A3AD36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C92349FE-5477-486B-90B4-2CDFA313EDB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C92349FE-5477-486B-90B4-2CDFA313EDB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C92349FE-5477-486B-90B4-2CDFA313EDB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AB2842E-FFAE-4B8D-95A5-841298A3AD36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AB2842E-FFAE-4B8D-95A5-841298A3AD36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AB2842E-FFAE-4B8D-95A5-841298A3AD36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AB2842E-FFAE-4B8D-95A5-841298A3AD36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
