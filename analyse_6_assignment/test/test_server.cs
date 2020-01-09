@@ -47,10 +47,16 @@ namespace test
 
                         int bytesReceived = connection.Receive(bytes);
                         data += Encoding.ASCII.GetString(bytes, 0, bytesReceived);
+
                         if (data.IndexOf("<EOF>") > -1)
                         {
                             // process message without <EOF>
-                            ProcessMessage(data.Remove(data.Length - 5));
+                            string reply = ProcessMessage(data.Remove(data.Length - 5));
+
+                            if(reply != "")
+                            {
+                                SendMessage(connection, $"I have received your message. It said: {reply}");
+                            }
                             data = "";
                         }
 
@@ -62,9 +68,10 @@ namespace test
 
             }
 
-            private void ProcessMessage(string data)
+            private string ProcessMessage(string data)
             {
-                
+                // TODO: Look what message is and do smthing accordingly
+                return data;
             }
 
             private void SendMessage(Socket connection, string msg)
