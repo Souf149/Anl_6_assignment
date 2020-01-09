@@ -15,7 +15,7 @@ public class Test_client
         Socket socket;
 
         private bool running = false;
-        byte[] bytes = new byte[2048];
+        byte[] bytes = new byte[1024];
 
 
         public Client(int port_)
@@ -40,23 +40,20 @@ public class Test_client
             while (running)
             {
 
-                new Thread(() =>
+                string data = "";
+                while (true)
                 {
-                    string data = "";
-                    while (true)
+
+                    int bytesReceived = socket.Receive(bytes);
+                    data += Encoding.ASCII.GetString(bytes, 0, bytesReceived);
+
+                    if (data.IndexOf("<EOF>") > -1)
                     {
-
-                        int bytesReceived = socket.Receive(bytes);
-                        data += Encoding.ASCII.GetString(bytes, 0, bytesReceived);
-
-                        if (data.IndexOf("<EOF>") > -1)
-                        {
-                            Console.WriteLine(data);
-                        }
+                        Console.WriteLine(data);
                     }
-                }).Start();
+                }
 
-                
+
 
 
                 msg = Console.ReadLine();

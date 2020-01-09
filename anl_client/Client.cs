@@ -190,8 +190,8 @@ namespace SocketClient {
             Console.Clear();
             int wt = 1000, nc = 5;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
-            // clientsSimulator.SequentialSimulation();
-            clientsSimulator.ConcurrentSimulation();
+            clientsSimulator.SequentialSimulation();
+            // clientsSimulator.ConcurrentSimulation();
 
             Console.WriteLine();
             Console.Read();

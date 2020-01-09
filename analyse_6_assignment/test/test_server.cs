@@ -17,7 +17,7 @@ namespace test
             public int portNumber;
             public int listeningQueueSize = 5;
 
-            private byte[] bytes = new byte[2048];
+            private byte[] bytes = new byte[1024];
             private bool running = true;
 
             public Server(IPAddress ip_, int port_)
