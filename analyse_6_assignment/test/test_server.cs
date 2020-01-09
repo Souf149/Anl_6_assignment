@@ -74,10 +74,10 @@ namespace test
                 return data;
             }
 
-            private void SendMessage(Socket connection, string msg)
+            private void SendMessage(Socket s, string msg)
             {
                 byte[] encodedMsg = Encoding.ASCII.GetBytes(msg + "<EOF>");
-                connection.Send(encodedMsg);
+                s.Send(encodedMsg);
             }
 
 
