@@ -6,163 +6,105 @@ using System.Threading;
 
 namespace test
 {
-    // State object for reading client data asynchronously  
-    public class StateObject
+    public class Program
     {
-        // Client  socket.  
-        public Socket workSocket = null;
-        // Size of receive buffer.  
-        public const int BufferSize = 1024;
-        // Receive buffer.  
-        public byte[] buffer = new byte[BufferSize];
-        // Received data string.  
-        public StringBuilder sb = new StringBuilder();
-    }
 
-    public class AsynchronousSocketListener
-    {
-        // Thread signal.  
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
-
-        public AsynchronousSocketListener()
+        public class Server
         {
-        }
+            public Socket listener;
+            public IPEndPoint localEndPoint;
+            public IPAddress ipAddress;
+            public int portNumber;
+            public int listeningQueueSize = 5;
 
-        public static void StartListening()
-        {
-            // Establish the local endpoint for the socket.  
-            // The DNS name of the computer  
-            // running the listener is "host.contoso.com".  
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
+            private byte[] bytes = new byte[2048];
+            private bool running = true;
 
-            // Create a TCP/IP socket.  
-            Socket listener = new Socket(ipAddress.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
-
-            // Bind the socket to the local endpoint and listen for incoming connections.  
-            try
+            public Server(IPAddress ip_, int port_)
             {
+                ipAddress = ip_;
+                portNumber = port_;
+                localEndPoint = new IPEndPoint(ipAddress, portNumber);
+                listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                // associate a network address to the Server Socket. All clients must know this address
                 listener.Bind(localEndPoint);
-                listener.Listen(100);
+                // This is a non-blocking listen with max number of pending requests
+                listener.Listen(listeningQueueSize);
+            }
 
-                while (true)
+            public void Start()
+            {
+                while (running)
                 {
-                    // Set the event to nonsignaled state.  
-                    allDone.Reset();
+                    Socket connection = listener.Accept();
+                    SendMessage(connection, Message.welcome);
 
-                    // Start an asynchronous socket to listen for connections.  
-                    Console.WriteLine("Waiting for a connection...");
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
+                    string data = "";
 
-                    // Wait until a connection is made before continuing.  
-                    allDone.WaitOne();
+                    // An incoming connection needs to be processed.  
+                    while (true)
+                    {
+
+                        int bytesReceived = connection.Receive(bytes);
+                        data += Encoding.ASCII.GetString(bytes, 0, bytesReceived);
+                        if (data.IndexOf("<EOF>") > -1)
+                        {
+                            // process message without <EOF>
+                            ProcessMessage(data.Remove(data.Length - 5));
+                            data = "";
+                        }
+
+                    }
+
+
                 }
 
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+
             }
 
-            Console.WriteLine("\nPress ENTER to continue...");
+            private void ProcessMessage(string data)
+            {
+                
+            }
+
+            private void SendMessage(Socket connection, string msg)
+            {
+                byte[] encodedMsg = Encoding.ASCII.GetBytes(msg + "<EOF>");
+                connection.Send(encodedMsg);
+            }
+
+
+        }
+
+
+        public static void Main(string[] args)
+        {
+            Server server = new Server(IPAddress.Parse("127.0.0.1"), 11111);
+            server.Start();
+
+            Console.WriteLine();
             Console.Read();
 
         }
 
-        public static void AcceptCallback(IAsyncResult ar)
+        public class ClientInfo
         {
-            // Signal the main thread to continue.  
-            allDone.Set();
-
-            // Get the socket that handles the client request.  
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-
-            // Create the state object.  
-            StateObject state = new StateObject();
-            state.workSocket = handler;
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                new AsyncCallback(ReadCallback), state);
+            public string studentnr { get; set; }
+            public string classname { get; set; }
+            public int clientid { get; set; }
+            public string teamname { get; set; }
+            public string ip { get; set; }
+            public string secret { get; set; }
+            public string status { get; set; }
         }
 
-        public static void ReadCallback(IAsyncResult ar)
+        public class Message
         {
-            String content = String.Empty;
-
-            // Retrieve the state object and the handler socket  
-            // from the asynchronous state object.  
-            StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
-
-            // Read data from the client socket.   
-            int bytesRead = handler.EndReceive(ar);
-
-            if (bytesRead > 0)
-            {
-                // There  might be more data, so store the data received so far.  
-                state.sb.Append(Encoding.ASCII.GetString(
-                    state.buffer, 0, bytesRead));
-
-                // Check for end-of-file tag. If it is not there, read   
-                // more data.  
-                content = state.sb.ToString();
-                if (content.IndexOf("<EOF>") > -1)
-                {
-                    // All the data has been read from the   
-                    // client. Display it on the console.  
-                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
-                        content.Length, content);
-                    // Echo the data back to the client.  
-                    Send(handler, content);
-                }
-                else
-                {
-                    // Not all data received. Get more.  
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReadCallback), state);
-                }
-            }
+            public const string welcome = "WELCOME";
+            public const string stopCommunication = "COMC-STOP";
+            public const string statusEnd = "STAT-STOP";
+            public const string secret = "SECRET";
         }
 
-        private static void Send(Socket handler, String data)
-        {
-            // Convert the string data to byte data using ASCII encoding.  
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
-
-            // Begin sending the data to the remote device.  
-            handler.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), handler);
-        }
-
-        private static void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the socket from the state object.  
-                Socket handler = (Socket)ar.AsyncState;
-
-                // Complete sending the data to the remote device.  
-                int bytesSent = handler.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        public static int Main(String[] args)
-        {
-            StartListening();
-            return 0;
-        }
     }
 }
