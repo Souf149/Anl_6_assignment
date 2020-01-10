@@ -2,116 +2,117 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
+using System.Text.Json;
 
-namespace test
+class Program
 {
-    public class Program
+
+    public static void StartServer()
     {
-
-        public class Server
+        byte[] bytes = new byte[1024];
+        bool running = true;
+        IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+        int portNumber = 11111;
+        IPEndPoint localEndPoint = new IPEndPoint(ipAddress, portNumber);
+        Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        listener.Bind(localEndPoint);
+        listener.Listen(5);
+        while (running)
         {
-            public Socket listener;
-            public IPEndPoint localEndPoint;
-            public IPAddress ipAddress;
-            public int portNumber;
-            public int listeningQueueSize = 5;
+            Socket connection = listener.Accept();
+            Console.WriteLine("Client connected!");
+            SendMessage(connection, Message.welcome);
+            string receivedMessage;
 
-            private byte[] bytes = new byte[1024];
-            private bool running = true;
-
-            public Server(IPAddress ip_, int port_)
+            try
             {
-                ipAddress = ip_;
-                portNumber = port_;
-                localEndPoint = new IPEndPoint(ipAddress, portNumber);
-                listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                // associate a network address to the Server Socket. All clients must know this address
-                listener.Bind(localEndPoint);
-                // This is a non-blocking listen with max number of pending requests
-                listener.Listen(listeningQueueSize);
-            }
-
-            public void Start()
-            {
-                while (running)
+                while (true)
                 {
-                    Socket connection = listener.Accept();
-                    SendMessage(connection, Message.welcome);
+                    int bytesReceived = connection.Receive(bytes);
+                    receivedMessage = Encoding.ASCII.GetString(bytes, 0, bytesReceived);
 
-                    string data = "";
-
-                    // An incoming connection needs to be processed.  
-                    while (true)
+                    //string replyMessage = processMessage(receivedMessage);
+                    Console.WriteLine("I got message: " + receivedMessage);
+                    /*
+                    if (replyMessage == Message.stopCommunication)
                     {
-
-                        int bytesReceived = connection.Receive(bytes);
-                        data += Encoding.ASCII.GetString(bytes, 0, bytesReceived);
-
-                        if (data.IndexOf("<EOF>") > -1)
-                        {
-                            // process message without <EOF>
-                            string reply = ProcessMessage(data.Remove(data.Length - 5));
-
-                            if(reply != "")
-                            {
-                                SendMessage(connection, $"I have received your message. It said: {reply}");
-                            }
-                            data = "";
-                        }
-
+                        running = false;
+                        break;
                     }
 
-
+                    SendMessage(connection, replyMessage);
+                    */
                 }
-
-
+            } catch {
+                Console.WriteLine("ERROR: The client probably forced to close.");
             }
+            
 
-            private string ProcessMessage(string data)
+        }
+    }
+
+    public static string processMessage(string msg)
+    {
+        string replyMsg = "";
+
+        try
+        {
+            switch (msg)
             {
-                // TODO: Look what message is and do smthing accordingly
-                return data;
+                case Message.stopCommunication:
+                    replyMsg = Message.stopCommunication;
+                    break;
+                default:
+                    ClientInfo c = JsonSerializer.Deserialize<ClientInfo>(msg.ToString());
+                    c.secret = c.studentnr + Message.secret;
+                    c.status = Message.statusEnd;
+                    replyMsg = JsonSerializer.Serialize(c);
+                    break;
             }
-
-            private void SendMessage(Socket s, string msg)
-            {
-                byte[] encodedMsg = Encoding.ASCII.GetBytes(msg + "<EOF>");
-                s.Send(encodedMsg);
-            }
-
-
         }
-
-
-        public static void Main(string[] args)
+        catch (Exception e)
         {
-            Server server = new Server(IPAddress.Parse("127.0.0.1"), 11111);
-            server.Start();
-
-            Console.WriteLine();
-            Console.Read();
-
+            Console.Out.WriteLine("[Server] processMessage {0}", e.Message);
         }
 
-        public class ClientInfo
-        {
-            public string studentnr { get; set; }
-            public string classname { get; set; }
-            public int clientid { get; set; }
-            public string teamname { get; set; }
-            public string ip { get; set; }
-            public string secret { get; set; }
-            public string status { get; set; }
-        }
+        return replyMsg;
+    }
 
-        public class Message
-        {
-            public const string welcome = "WELCOME";
-            public const string stopCommunication = "COMC-STOP";
-            public const string statusEnd = "STAT-STOP";
-            public const string secret = "SECRET";
-        }
+    public static void Main(string[] args)
+    {
+
+        StartServer();
+
+
+        Console.WriteLine();
+        Console.Read();
 
     }
+
+    private static void SendMessage(Socket s, string msg)
+    {
+        byte[] encodedMsg = Encoding.ASCII.GetBytes(msg);
+        s.Send(encodedMsg);
+    }
+
+    public class ClientInfo
+    {
+        public string studentnr { get; set; }
+        public string classname { get; set; }
+        public int clientid { get; set; }
+        public string teamname { get; set; }
+        public string ip { get; set; }
+        public string secret { get; set; }
+        public string status { get; set; }
+    }
+
+    public class Message
+    {
+        public const string welcome = "WELCOME";
+        public const string stopCommunication = "COMC-STOP";
+        public const string statusEnd = "STAT-STOP";
+        public const string secret = "SECRET";
+    }
+
 }
+

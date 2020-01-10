@@ -14,7 +14,7 @@ public class Test_client
         IPEndPoint server;
         Socket socket;
 
-        private bool running = false;
+        private bool running = true;
         byte[] bytes = new byte[1024];
 
 
@@ -35,26 +35,21 @@ public class Test_client
 
             socket.Connect(server);
             Console.WriteLine("[CLIENT] I have connected to the server");
-            string msg = "";
+            string msg;
+            int bytesReceived;
+            string data;
 
             while (running)
             {
+                Thread.Sleep(1000);
+                Console.WriteLine("*");
 
-                string data = "";
-                while (true)
-                {
+                
+                
+                bytesReceived = socket.Receive(bytes);
+                data = Encoding.ASCII.GetString(bytes, 0, bytesReceived);
 
-                    int bytesReceived = socket.Receive(bytes);
-                    data += Encoding.ASCII.GetString(bytes, 0, bytesReceived);
-
-                    if (data.IndexOf("<EOF>") > -1)
-                    {
-                        Console.WriteLine(data);
-                    }
-                }
-
-
-
+                Console.WriteLine($"I got the following message:\n{data}");
 
                 msg = Console.ReadLine();
                 SendMessage(socket, msg);
@@ -64,7 +59,7 @@ public class Test_client
 
         private void SendMessage(Socket s, string msg)
         {
-            byte[] encodedMsg = Encoding.ASCII.GetBytes(msg + "<EOF>");
+            byte[] encodedMsg = Encoding.ASCII.GetBytes(msg);
             s.Send(encodedMsg);
         }
 
@@ -76,5 +71,7 @@ public class Test_client
     {
         Client client = new Client(11111);
         client.Start();
+
+        Console.ReadKey();
     }
 }
