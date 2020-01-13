@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Text.Json;
 class Program
 {
     static bool running = false;
+    static List<ClientInfo> clients = new List<ClientInfo>();
 
     public static void StartServer()
     {
@@ -49,10 +51,23 @@ class Program
                 Console.WriteLine("ERROR: The client probably forced to close.");
             }
 
-            Console.WriteLine("Server is done");
+
+            FinishServer();
+
             
 
         }
+    }
+
+    private static void FinishServer() {
+        Console.WriteLine("Server is done");
+
+        Console.Out.WriteLine("[Server] This is the list of clients communicated");
+        foreach (ClientInfo c in clients) {
+            Console.WriteLine(c.classname + " " + c.studentnr + " " + c.clientid.ToString());
+        }
+        Console.Out.WriteLine($"[Server] Number of handled clients: {clients.Count}");
+
     }
 
     public static string processMessage(string msg)
@@ -67,16 +82,17 @@ class Program
                     replyMsg = Message.stopCommunication;
                     break;
                 default:
-                    ClientInfo c = JsonSerializer.Deserialize<ClientInfo>(msg.ToString());
+                    ClientInfo client = JsonSerializer.Deserialize<ClientInfo>(msg.ToString());
 
-                    if (c.clientid == -1) {
+                    if (client.clientid == -1) {
                         running = false;
                         Console.WriteLine("Last client received");
                     }
 
-                    c.secret = c.studentnr + Message.secret;
-                    c.status = Message.statusEnd;
-                    replyMsg = JsonSerializer.Serialize(c);
+                    client.secret = client.studentnr + Message.secret;
+                    client.status = Message.statusEnd;
+                    clients.Add(client);
+                    replyMsg = JsonSerializer.Serialize(client);
                     break;
             }
         }
