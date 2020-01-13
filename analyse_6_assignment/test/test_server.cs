@@ -12,7 +12,6 @@ class Program
 
     public static void StartServer()
     {
-        byte[] bytes = new byte[1024];
         running = true;
         IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
         int portNumber = 11111;
@@ -23,40 +22,46 @@ class Program
         while (running)
         {
             Socket connection = listener.Accept();
-            Console.WriteLine("Client connected!");
-            SendMessage(connection, Message.welcome);
 
-            string receivedMessage;
-
-            try
-            {
-                while (true)
-                {
-                    int bytesReceived = connection.Receive(bytes);
-                    receivedMessage = Encoding.ASCII.GetString(bytes, 0, bytesReceived);
-
-                    string replyMessage = processMessage(receivedMessage);
-                    Console.WriteLine("I got message: " + receivedMessage);
-                    
-                    if (replyMessage == Message.stopCommunication)
-                    {
-                        Console.WriteLine("I got a stop message!");
-                        break;
-                    }
-
-                    SendMessage(connection, replyMessage);
-                    
-                }
-            } catch {
-                Console.WriteLine("ERROR: The client probably forced to close.");
-            }
-
-
-            FinishServer();
+            
+            HandleClient(connection);
 
             
 
         }
+    }
+
+    private static void HandleClient(Socket connection) {
+        Console.WriteLine("Client connected!");
+        SendMessage(connection, Message.welcome);
+
+        string receivedMessage;
+        byte[] bytes = new byte[1024];
+
+
+        try {
+            while (true) {
+                int bytesReceived = connection.Receive(bytes);
+                receivedMessage = Encoding.ASCII.GetString(bytes, 0, bytesReceived);
+
+                string replyMessage = processMessage(receivedMessage);
+                Console.WriteLine("I got message: " + receivedMessage);
+
+                if (replyMessage == Message.stopCommunication) {
+                    Console.WriteLine("I got a stop message!");
+                    break;
+                }
+
+                SendMessage(connection, replyMessage);
+
+            }
+        }
+        catch {
+            Console.WriteLine("ERROR: The client probably forced to close.");
+        }
+
+
+        FinishServer();
     }
 
     private static void FinishServer() {
