@@ -6,11 +6,12 @@ using System.Text.Json;
 
 class Program
 {
+    static bool running = false;
 
     public static void StartServer()
     {
         byte[] bytes = new byte[1024];
-        bool running = true;
+        running = true;
         IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
         int portNumber = 11111;
         IPEndPoint localEndPoint = new IPEndPoint(ipAddress, portNumber);
@@ -22,6 +23,7 @@ class Program
             Socket connection = listener.Accept();
             Console.WriteLine("Client connected!");
             SendMessage(connection, Message.welcome);
+
             string receivedMessage;
 
             try
@@ -31,21 +33,23 @@ class Program
                     int bytesReceived = connection.Receive(bytes);
                     receivedMessage = Encoding.ASCII.GetString(bytes, 0, bytesReceived);
 
-                    //string replyMessage = processMessage(receivedMessage);
+                    string replyMessage = processMessage(receivedMessage);
                     Console.WriteLine("I got message: " + receivedMessage);
-                    /*
+                    
                     if (replyMessage == Message.stopCommunication)
                     {
-                        running = false;
+                        Console.WriteLine("I got a stop message!");
                         break;
                     }
 
                     SendMessage(connection, replyMessage);
-                    */
+                    
                 }
             } catch {
                 Console.WriteLine("ERROR: The client probably forced to close.");
             }
+
+            Console.WriteLine("Server is done");
             
 
         }
@@ -64,6 +68,12 @@ class Program
                     break;
                 default:
                     ClientInfo c = JsonSerializer.Deserialize<ClientInfo>(msg.ToString());
+
+                    if (c.clientid == -1) {
+                        running = false;
+                        Console.WriteLine("Last client received");
+                    }
+
                     c.secret = c.studentnr + Message.secret;
                     c.status = Message.statusEnd;
                     replyMsg = JsonSerializer.Serialize(c);
