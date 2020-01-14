@@ -47,67 +47,87 @@ namespace SocketServer
         public readonly int portNumber = 11111;
 
         public String results = "";
-        public LinkedList<ClientInfo> clients = new LinkedList<ClientInfo>();
+        public static LinkedList<ClientInfo> clients = new LinkedList<ClientInfo>();
+
+        public static List<Thread> myThreads;
 
         private Boolean stopCond = false;
         private int processingTime = 1000;
         private int listeningQueueSize = 5;
 
+        byte[] bytes = new Byte[1024];
+        String data = null;
+        int numByte = 0;
+        string replyMsg = "";
+        bool stop;
 
 
 
-        public ConcurrentServer()
+        public void communicate(Socket connection)
         {
-            Thread clientThread = new Thread(prepareServer);
-            clientThread.Start();
-        }
+            this.sendReply(connection, Message.welcome);
 
-        // public void communicate()
-        // {
-        //     this.prepareServer();
-        //     // this.exportResults();
-        // }
+            stop = false;
+            while (!stop)
+            {
+                numByte = connection.Receive(bytes);
+                data = Encoding.ASCII.GetString(bytes, 0, numByte);
+                replyMsg = processMessage(data);
+                if (replyMsg.Equals(Message.stopCommunication))
+                {
+                    stop = true;
+                    break;
+                }
+                else
+                    this.sendReply(connection, replyMsg);
+            }
+        }
 
         public void prepareServer()
         {
-            byte[] bytes = new Byte[1024];
-            String data = null;
-            int numByte = 0;
-            string replyMsg = "";
-            bool stop;
 
+            Console.WriteLine("[Server] is ready to start ...");
+            // Establish the local endpoint
+            localEndPoint = new IPEndPoint(ipAddress, portNumber);
+            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            Console.Out.WriteLine("[Server] A socket is established ...");
+            // associate a network address to the Server Socket. All clients must know this address
+            listener.Bind(localEndPoint);
+            // This is a non-blocking listen with max number of pending requests
+            listener.Listen(listeningQueueSize);
+            //
+            this.RunClients();
+
+        }
+        public void RunClients()
+        {
             try
             {
-                Console.WriteLine("[Server] is ready to start ...");
-                // Establish the local endpoint
-                localEndPoint = new IPEndPoint(ipAddress, portNumber);
-                listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                Console.Out.WriteLine("[Server] A socket is established ...");
-                // associate a network address to the Server Socket. All clients must know this address
-                listener.Bind(localEndPoint);
-                // This is a non-blocking listen with max number of pending requests
-                listener.Listen(listeningQueueSize);
                 while (true)
                 {
                     Console.WriteLine("Waiting connection ... ");
                     // Suspend while waiting for incoming connection 
                     Socket connection = listener.Accept();
-                    this.sendReply(connection, Message.welcome);
+                    myThreads.Add(new Thread(() => this.communicate(connection)));
 
-                    stop = false;
-                    while (!stop)
-                    {
-                        numByte = connection.Receive(bytes);
-                        data = Encoding.ASCII.GetString(bytes, 0, numByte);
-                        replyMsg = processMessage(data);
-                        if (replyMsg.Equals(Message.stopCommunication))
-                        {
-                            stop = true;
-                            break;
-                        }
-                        else
-                            this.sendReply(connection, replyMsg);
-                    }
+                    
+                    
+                    // this.sendReply(connection, Message.welcome);
+
+                    // stop = false;
+                    // while (!stop)
+                    // {
+                    //     numByte = connection.Receive(bytes);
+                    //     data = Encoding.ASCII.GetString(bytes, 0, numByte);
+                    //     replyMsg = processMessage(data);
+                    //     if (replyMsg.Equals(Message.stopCommunication))
+                    //     {
+                    //         stop = true;
+                    //         break;
+                    //     }
+                    //     else
+                    //         this.sendReply(connection, replyMsg);
+                    // }
 
                 }
 
@@ -185,30 +205,32 @@ namespace SocketServer
 
     public class ServerSimulator
     {
-        public static Thread[] myThreads;
 
         public static void concurrentRun()
         {
 
             Console.Out.WriteLine("[Server] A sample server, concurrent version ...");
             ConcurrentServer server = new ConcurrentServer();
-            var length = server.clients.Count;
-            var clients = server.clients;
+            server.prepareServer();
+
+            // server.communicate();
+
             // Create threads
 
-            // for (int i = 0; i < length; i++)
+
+            // for (int i = 0; i < 10; i++)
             // {
-            //     myThreads[i] = new Thread(() => server.communicate());
+            //     ConcurrentServer.myThreads[i] = new Thread(() => server.communicate());
             // }
 
-            // for (int i = 0; i < length; i++)
+            // for (int i = 0; i < 10; i++)
             // {
-            //     myThreads[i].Start();
+            //     ConcurrentServer.myThreads[i].Start();
 
             // }
-            // for (int i = 0; i < length; i++)
+            // for (int i = 0; i < 10; i++)
             // {
-            //     myThreads[i].Join();
+            //     ConcurrentServer.myThreads[i].Join();
 
             // }
         }
