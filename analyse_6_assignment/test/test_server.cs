@@ -4,11 +4,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 class Program
 {
     static bool running = false;
     static List<ClientInfo> clients = new List<ClientInfo>();
+    static List<Thread> threads = new List<Thread>();
+    
 
     public static void StartServer()
     {
