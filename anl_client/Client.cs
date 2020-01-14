@@ -160,9 +160,9 @@ namespace SocketClient {
             Console.Out.WriteLine("[ClientSimulator] Concurrent simulator is going to start ...");
             // todo: In order to test the final solution, it is recommended to implement this method.
 
-            Console.Out.WriteLine("\n[ClientSimulator] Sequential simulator is going to start ...");
             for (int i = 0; i < clients.Length; i++) {
-                threads.Add(new Thread(() => runClient(clients[i])));
+                Client c = clients[i];
+                threads.Add(new Thread(() => runClient(c)));
             }
 
             foreach(Thread t in threads) {
@@ -190,8 +190,8 @@ namespace SocketClient {
             Console.Clear();
             int wt = 1000, nc = 10;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
-            clientsSimulator.SequentialSimulation();
-            // clientsSimulator.ConcurrentSimulation();
+            //clientsSimulator.SequentialSimulation();
+            clientsSimulator.ConcurrentSimulation();
 
             Console.WriteLine();
             Console.Read();
