@@ -53,11 +53,20 @@ namespace SocketServer
         private int processingTime = 1000;
         private int listeningQueueSize = 5;
 
-        public void Client()
+
+
+
+        public ConcurrentServer()
         {
             Thread clientThread = new Thread(prepareServer);
             clientThread.Start();
         }
+
+        // public void communicate()
+        // {
+        //     this.prepareServer();
+        //     // this.exportResults();
+        // }
 
         public void prepareServer()
         {
@@ -170,16 +179,38 @@ namespace SocketServer
             stopCond = false;
 
         }
+
+
     }
 
     public class ServerSimulator
     {
+        public static Thread[] myThreads;
+
         public static void concurrentRun()
         {
+
             Console.Out.WriteLine("[Server] A sample server, concurrent version ...");
             ConcurrentServer server = new ConcurrentServer();
-            server.Client();
-            server.exportResults();
+            var length = server.clients.Count;
+            var clients = server.clients;
+            // Create threads
+
+            // for (int i = 0; i < length; i++)
+            // {
+            //     myThreads[i] = new Thread(() => server.communicate());
+            // }
+
+            // for (int i = 0; i < length; i++)
+            // {
+            //     myThreads[i].Start();
+
+            // }
+            // for (int i = 0; i < length; i++)
+            // {
+            //     myThreads[i].Join();
+
+            // }
         }
     }
     class Program

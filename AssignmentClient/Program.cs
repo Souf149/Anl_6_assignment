@@ -50,6 +50,14 @@ namespace SocketClient
             info.clientid = finishing ? -1 : 1;
         }
 
+        public void communicate()
+        {
+            this.prepareClient();
+            this.startCommunication();
+            this.endCommunication();
+        }
+
+
         public string getClientInfo()
         {
             return JsonSerializer.Serialize<ClientInfo>(info);
@@ -152,10 +160,13 @@ namespace SocketClient
         private Client[] clients;
         public readonly int waitingTimeForStop = 2000;
 
+        private Thread[] myThreads;
+
 
         public ClientsSimulator(int n, int t)
         {
             numberOfClients = n;
+            myThreads = new Thread[numberOfClients];
             clients = new Client[numberOfClients];
             for (int i = 0; i < numberOfClients; i++)
             {
@@ -163,25 +174,32 @@ namespace SocketClient
             }
         }
 
+        
         public void ConcurrentSimulation()
         {
-            Console.Out.WriteLine("\n[ClientSimulator] Concurrent simulator is going to start ...");
+            // Create threads
             for (int i = 0; i < numberOfClients; i++)
             {
-                clients[i].prepareClient();
-                clients[i].startCommunication();
-                clients[i].endCommunication();
+                myThreads[i] = new Thread(clients[i].communicate);
             }
 
-            Console.Out.WriteLine("\n[ClientSimulator] All clients finished with their communications ... ");
+            for(int i = 0; i < numberOfClients; i++)
+            {
+                myThreads[i].Start();
+    
+            }
+            for (int i = 0; i < numberOfClients; i++)
+            {
+                myThreads[i].Join();
 
+            }
             Thread.Sleep(waitingTimeForStop);
 
             Client endClient = new Client(true, -1);
-            endClient.prepareClient();
-            endClient.startCommunication();
-            endClient.endCommunication();
+            endClient.communicate();
+            
         }
+
 
     }
     class Program
@@ -192,6 +210,7 @@ namespace SocketClient
             Console.Clear();
             int wt = 2, nc = 5;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
+            // clientsSimulator.startClients();
             clientsSimulator.ConcurrentSimulation();
             Thread.Sleep(wt);
 
