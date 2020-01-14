@@ -11,7 +11,6 @@ class Program {
     static bool running = false;
     static List<ClientInfo> clients = new List<ClientInfo>();
     static List<Thread> threads = new List<Thread>();
-    static List<Socket> sockets = new List<Socket>();
 
 
     static IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
@@ -31,7 +30,6 @@ class Program {
         try {
             while (running) {
                 Socket connection = listener.Accept();
-                sockets.Add(connection);
 
                 Socket s = connection;
 
