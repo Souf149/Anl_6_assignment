@@ -1,4 +1,13 @@
-﻿using System;
+﻿/***
+ * 
+ * Mameber 1: Soufyan Abdellati
+ * Std Number 1: 0963595
+ * Class: INF2a
+ * 
+ ***/
+
+
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
