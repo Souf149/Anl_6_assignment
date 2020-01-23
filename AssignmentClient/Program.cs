@@ -143,8 +143,8 @@ namespace SocketClient
         {
             // Create the message to send
             Console.Out.WriteLine("[Client] Message to be sent: {0}", msg);
-            byte[] messageSent = Encoding.ASCII.GetBytes(msg);
-            int byteSent = clientSocket.Send(messageSent);
+            byte[] SentMessage = Encoding.ASCII.GetBytes(msg);
+            int byteSent = clientSocket.Send(SentMessage);
         }
         public void endCommunication()
         {
@@ -208,7 +208,7 @@ namespace SocketClient
         static void Main(string[] args)
         {
             Console.Clear();
-            int wt = 2, nc = 5;
+            int wt = 2, nc = 100;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
             // clientsSimulator.startClients();
             clientsSimulator.ConcurrentSimulation();

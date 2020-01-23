@@ -1,4 +1,4 @@
-﻿/*** Fill these lines with your complete information.
+/*** Fill these lines with your complete information.
  * Note: Incomplete information may result in FAIL.
  * Mameber 1: [First and Last name, first member]: // todo: write here.
  * Ahmet Karatas
@@ -8,7 +8,6 @@
  * INF2C
  ***/
 
-
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -17,232 +16,180 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 
-namespace SocketServer
+
+public class ClientInfo
 {
-    public class ClientInfo
+    public string studentnr { get; set; }
+    public string classname { get; set; }
+    public int clientid { get; set; }
+    public string teamname { get; set; }
+    public string ip { get; set; }
+    public string secret { get; set; }
+    public string status { get; set; }
+}
+
+public class Message
+{
+    public const string welcome = "WELCOME";
+    public const string stopCommunication = "COMC-STOP";
+    public const string statusEnd = "STAT-STOP";
+    public const string secret = "SECRET";
+}
+class ConcurrentServer
+{
+
+    public bool stop = false;
+    public List<Thread> myThreads = new List<Thread>();
+    public List<ClientInfo> clients = new List<ClientInfo>();
+    public String data = null;
+
+    public IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+    public readonly int portNumber = 11111;
+    public IPEndPoint localEndPoint;
+    public Socket listener;
+
+
+    public void PrepareServer()
     {
-        public string studentnr { get; set; }
-        public string classname { get; set; }
-        public int clientid { get; set; }
-        public string teamname { get; set; }
-        public string ip { get; set; }
-        public string secret { get; set; }
-        public string status { get; set; }
-    }
+        localEndPoint = new IPEndPoint(ipAddress, portNumber);
+        listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        stop = true;
 
-    public class Message
-    {
-        public const string welcome = "WELCOME";
-        public const string stopCommunication = "COMC-STOP";
-        public const string statusEnd = "STAT-STOP";
-        public const string secret = "SECRET";
-    }
+        listener.Bind(localEndPoint);
+        listener.Listen(5);
+        Console.WriteLine("[Server] is ready to start ...");
+        Console.WriteLine("[Server] will receive messages now.....");
 
-
-    public class ConcurrentServer
-    {
-        public Socket listener;
-        public IPEndPoint localEndPoint;
-        public IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
-        public readonly int portNumber = 11111;
-
-        public String results = "";
-        public static LinkedList<ClientInfo> clients = new LinkedList<ClientInfo>();
-
-        public static List<Thread> myThreads;
-
-        private Boolean stopCond = false;
-        private int processingTime = 1000;
-        private int listeningQueueSize = 5;
-
-        byte[] bytes = new Byte[1024];
-        String data = null;
-        int numByte = 0;
-        string replyMsg = "";
-        bool stop;
-
-
-
-        public void communicate(Socket connection)
+        try
         {
-            this.sendReply(connection, Message.welcome);
-
-            stop = false;
-            while (!stop)
+            while (stop)
             {
-                numByte = connection.Receive(bytes);
+                Socket connection = listener.Accept();
+                myThreads.Add(
+                    new Thread(() => HandleClient(connection))
+                );
+                myThreads[myThreads.Count - 1].Start();
+            }
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+
+    public void HandleClient(Socket connection)
+    {
+        Console.WriteLine("[Server] Client connected........");
+        this.SendReply(connection, Message.welcome);
+
+        byte[] bytes = new byte[1024];
+
+
+        try
+        {
+            while (true)
+            {
+                int numByte = connection.Receive(bytes);
                 data = Encoding.ASCII.GetString(bytes, 0, numByte);
-                replyMsg = processMessage(data);
+                string replyMsg = processMessage(data);
+                Console.WriteLine("Message received: " + data);
+
                 if (replyMsg.Equals(Message.stopCommunication))
                 {
-                    stop = true;
+                    Console.WriteLine("[Server] Stop message received.....!");
                     break;
                 }
                 else
-                    this.sendReply(connection, replyMsg);
-            }
-        }
-
-        public void prepareServer()
-        {
-
-            Console.WriteLine("[Server] is ready to start ...");
-            // Establish the local endpoint
-            localEndPoint = new IPEndPoint(ipAddress, portNumber);
-            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            Console.Out.WriteLine("[Server] A socket is established ...");
-            // associate a network address to the Server Socket. All clients must know this address
-            listener.Bind(localEndPoint);
-            // This is a non-blocking listen with max number of pending requests
-            listener.Listen(listeningQueueSize);
-            //
-            this.RunClients();
-
-        }
-        public void RunClients()
-        {
-            try
-            {
-                while (true)
                 {
-                    Console.WriteLine("Waiting connection ... ");
-                    // Suspend while waiting for incoming connection 
-                    Socket connection = listener.Accept();
-                    myThreads.Add(new Thread(() => this.communicate(connection)));
-
-                    
-                    
-                    // this.sendReply(connection, Message.welcome);
-
-                    // stop = false;
-                    // while (!stop)
-                    // {
-                    //     numByte = connection.Receive(bytes);
-                    //     data = Encoding.ASCII.GetString(bytes, 0, numByte);
-                    //     replyMsg = processMessage(data);
-                    //     if (replyMsg.Equals(Message.stopCommunication))
-                    //     {
-                    //         stop = true;
-                    //         break;
-                    //     }
-                    //     else
-                    //         this.sendReply(connection, replyMsg);
-                    // }
-
+                    this.SendReply(connection, replyMsg);
+                }
+                if (!stop)
+                {
+                    Thread.Sleep(1000);
+                    listener.Close();
                 }
 
             }
-            catch (Exception e)
-            {
-                Console.Out.WriteLine(e.Message);
-            }
         }
-
-
-        public string processMessage(String msg)
+        catch (Exception e)
         {
-            Thread.Sleep(processingTime);
-            Console.WriteLine("[Server] received from the client -> {0} ", msg);
-            string replyMsg = "";
-
-            try
-            {
-                switch (msg)
-                {
-                    case Message.stopCommunication:
-                        replyMsg = Message.stopCommunication;
-                        break;
-                    default:
-                        ClientInfo c = JsonSerializer.Deserialize<ClientInfo>(msg.ToString());
-                        clients.AddLast(c);
-                        if (c.clientid == -1)
-                        {
-                            stopCond = true;
-                            exportResults();
-                        }
-                        c.secret = c.studentnr + Message.secret;
-                        c.status = Message.statusEnd;
-                        replyMsg = JsonSerializer.Serialize<ClientInfo>(c);
-                        break;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.Out.WriteLine("[Server] processMessage {0}", e.Message);
-            }
-
-            return replyMsg;
-        }
-        public void sendReply(Socket connection, string msg)
-        {
-            byte[] encodedMsg = Encoding.ASCII.GetBytes(msg);
-            connection.Send(encodedMsg);
-        }
-        public void exportResults()
-        {
-            if (stopCond)
-            {
-                this.printClients();
-            }
-        }
-        public void printClients()
-        {
-            string delimiter = " , ";
-            Console.Out.WriteLine("[Server] This is the list of clients communicated");
-            foreach (ClientInfo c in clients)
-            {
-                Console.WriteLine(c.classname + delimiter + c.studentnr + delimiter + c.clientid.ToString());
-            }
-            Console.Out.WriteLine("[Server] Number of handled clients: {0}", clients.Count);
-
-            clients.Clear();
-            stopCond = false;
-
+            Console.WriteLine(e.Message);
         }
 
 
     }
 
-    public class ServerSimulator
+    private void FinishServer()
     {
+        Console.WriteLine("Execution finished");
 
-        public static void concurrentRun()
+        foreach (Thread thread in myThreads)
         {
-
-            Console.Out.WriteLine("[Server] A sample server, concurrent version ...");
-            ConcurrentServer server = new ConcurrentServer();
-            server.prepareServer();
-
-            // server.communicate();
-
-            // Create threads
-
-
-            // for (int i = 0; i < 10; i++)
-            // {
-            //     ConcurrentServer.myThreads[i] = new Thread(() => server.communicate());
-            // }
-
-            // for (int i = 0; i < 10; i++)
-            // {
-            //     ConcurrentServer.myThreads[i].Start();
-
-            // }
-            // for (int i = 0; i < 10; i++)
-            // {
-            //     ConcurrentServer.myThreads[i].Join();
-
-            // }
+            thread.Join();
         }
+
+        Console.Out.WriteLine("[Server] This is the list of clients communicated");
+        foreach (ClientInfo c in clients)
+        {
+            Console.WriteLine(c.classname + " " + c.studentnr + " " + c.clientid.ToString());
+        }
+        Console.Out.WriteLine("[Server] Number of handled clients: {0}",clients.Count);
+
     }
-    class Program
+
+    public string processMessage(string msg)
     {
-        // Main Method 
-        static void Main(string[] args)
+        string replyMsg = "";
+
+        try
         {
-            Console.Clear();
-            ServerSimulator.concurrentRun();
+            switch (msg)
+            {
+                case Message.stopCommunication:
+                    replyMsg = Message.stopCommunication;
+                    break;
+                default:
+                    ClientInfo client = JsonSerializer.Deserialize<ClientInfo>(msg.ToString());
+
+                    client.secret = client.studentnr + Message.secret;
+                    client.status = Message.statusEnd;
+                    clients.Add(client);
+
+                    if (client.clientid == -1)
+                    {
+                        stop = false;
+                        Console.WriteLine("This is the last client of today!");
+
+                    }
+
+                    replyMsg = JsonSerializer.Serialize(client);
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.Out.WriteLine("[Server] processMessage {0}", e.Message);
         }
 
+        return replyMsg;
     }
+    public void SendReply(Socket s, string msg)
+    {
+        byte[] encodedMsg = Encoding.ASCII.GetBytes(msg);
+        s.Send(encodedMsg);
+    }
+
+    public static void Main(string[] args)
+    {
+        ConcurrentServer c = new ConcurrentServer();
+        c.PrepareServer();
+        c.FinishServer();
+        Console.WriteLine("Program has been terminated......");
+        Console.Read();
+
+    }
+
 }
+
