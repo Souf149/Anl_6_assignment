@@ -208,7 +208,7 @@ namespace SocketClient
         static void Main(string[] args)
         {
             Console.Clear();
-            int wt = 2, nc = 100;
+            int wt = 2, nc = 200;
             ClientsSimulator clientsSimulator = new ClientsSimulator(nc, wt);
             // clientsSimulator.startClients();
             clientsSimulator.ConcurrentSimulation();

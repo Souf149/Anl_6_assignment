@@ -37,6 +37,7 @@ public class Message
 }
 class ConcurrentServer
 {
+    private object lockobjc;
 
     public bool stop = false;
     public List<Thread> myThreads = new List<Thread>();
@@ -121,7 +122,13 @@ class ConcurrentServer
 
     }
 
-    private void FinishServer()
+    public void SendReply(Socket s, string msg)
+    {
+        byte[] encodedMsg = Encoding.ASCII.GetBytes(msg);
+        s.Send(encodedMsg);
+    }
+
+    private void EndServer()
     {
         Console.WriteLine("Execution finished");
 
@@ -147,6 +154,7 @@ class ConcurrentServer
         {
             switch (msg)
             {
+                
                 case Message.stopCommunication:
                     replyMsg = Message.stopCommunication;
                     break;
@@ -166,6 +174,7 @@ class ConcurrentServer
 
                     replyMsg = JsonSerializer.Serialize(client);
                     break;
+
             }
         }
         catch (Exception e)
@@ -175,17 +184,12 @@ class ConcurrentServer
 
         return replyMsg;
     }
-    public void SendReply(Socket s, string msg)
-    {
-        byte[] encodedMsg = Encoding.ASCII.GetBytes(msg);
-        s.Send(encodedMsg);
-    }
 
     public static void Main(string[] args)
     {
         ConcurrentServer c = new ConcurrentServer();
         c.PrepareServer();
-        c.FinishServer();
+        c.EndServer();
         Console.WriteLine("Program has been terminated......");
         Console.Read();
 
